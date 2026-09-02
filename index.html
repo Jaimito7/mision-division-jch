@@ -1,0 +1,536 @@
+<!doctype html>
+<html lang="es">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Misión División JCH</title>
+<style>
+html,body{margin:0;min-height:100%;background:#101722;font-family:system-ui,-apple-system,Segoe UI,sans-serif}
+*{box-sizing:border-box}
+#access-gate{
+  min-height:100vh;display:flex;align-items:center;justify-content:center;
+  padding:20px;background:linear-gradient(145deg,#0f1725,#172238);
+}
+#access-card{
+  width:min(420px,100%);background:#182231;color:#f5f7fb;
+  border:1px solid #314158;border-radius:24px;padding:28px;text-align:center;
+  box-shadow:0 20px 50px rgba(0,0,0,.28);
+}
+#access-logo{
+  width:74px;height:74px;margin:0 auto 14px;border-radius:20px;
+  display:flex;align-items:center;justify-content:center;
+  background:linear-gradient(135deg,#6b7cff,#8a5cff);
+  font-size:26px;font-weight:1000;color:#fff;letter-spacing:1px;
+}
+#access-card h1{margin:4px 0 8px;font-size:28px}
+#access-card p{margin:0 0 18px;color:#b9c4d5;line-height:1.45}
+#access-form{display:flex;flex-direction:column;gap:10px}
+#access-password{
+  width:100%;min-height:52px;border:2px solid #3a495d;border-radius:14px;
+  background:#101722;color:#fff;font-size:18px;font-weight:800;
+  padding:12px 14px;text-align:center;outline:none;
+}
+#access-password:focus{border-color:#6b7cff;box-shadow:0 0 0 4px rgba(107,124,255,.18)}
+#access-submit{
+  min-height:50px;border:0;border-radius:14px;background:#6b7cff;color:#fff;
+  font-size:17px;font-weight:900;cursor:pointer;
+}
+#access-message{min-height:22px;margin-top:10px;color:#ffabb5;font-weight:750}
+#game-shell{display:none}
+</style>
+</head>
+<body>
+<div id="access-gate">
+  <div id="access-card">
+    <div id="access-logo">JCH</div>
+    <h1>Misión División</h1>
+    <p>Ingresa la contraseña de la clase para comenzar a practicar.</p>
+    <form id="access-form">
+      <input id="access-password" type="password" autocomplete="off" autocapitalize="off"
+             spellcheck="false" placeholder="Contraseña" aria-label="Contraseña de acceso">
+      <button id="access-submit" type="submit">Entrar al juego</button>
+    </form>
+    <div id="access-message" aria-live="polite"></div>
+  </div>
+</div>
+
+<div id="game-shell">
+<div id="division-game" class="game-root">
+  <style>
+    #division-game{font-family:ui-rounded,"Arial Rounded MT Bold",system-ui,sans-serif;background:light-dark(#f4f8ff,#101722);color:light-dark(#172033,#f5f7fb);min-height:100%;padding:24px;box-sizing:border-box;border-radius:0}
+    #division-game *{box-sizing:border-box}
+    .wrap{max-width:980px;margin:0 auto}
+    .hero{display:flex;gap:16px;justify-content:space-between;align-items:flex-start;flex-wrap:wrap;margin-bottom:18px}
+    .brand-row{display:flex;align-items:center;gap:12px;margin-bottom:10px}
+    .brand-logo{width:54px;height:54px;border-radius:16px;display:flex;align-items:center;justify-content:center;background:linear-gradient(135deg,#6b7cff,#8a5cff);color:#fff;font-weight:1000;font-size:20px;letter-spacing:1px;box-shadow:0 8px 20px rgba(107,124,255,.22);user-select:none}
+    .hero h2{font-size:clamp(28px,5vw,46px);margin:0 0 6px;font-weight:900;letter-spacing:-1px}
+    .hero p{margin:0;color:light-dark(#5a667b,#b5bfd0);max-width:620px}
+    .stats{display:flex;gap:10px;flex-wrap:wrap}
+    .pill{background:light-dark(#fff,#182231);border:1px solid light-dark(#dce5f2,#2c3a4d);padding:10px 13px;border-radius:16px;font-weight:800;min-width:92px;text-align:center}
+    .main{display:block}
+    .card{background:light-dark(#fff,#182231);border:1px solid light-dark(#dce5f2,#2c3a4d);border-radius:24px;padding:20px}
+    .level-picker{display:grid;grid-template-columns:repeat(3,1fr);gap:10px;margin:0 0 18px}
+    .level-btn{min-height:74px;text-align:left;border:2px solid light-dark(#dce5f2,#2c3a4d);background:light-dark(#f8fbff,#131c29);color:inherit;padding:12px 14px;border-radius:16px}
+    .level-btn.active{border-color:#6b7cff;background:light-dark(#eef1ff,#202945)}
+    .level-btn strong{display:block;font-size:16px;margin-bottom:3px}.level-btn span{display:block;font-size:12px;font-weight:750;color:light-dark(#68758a,#b7c3d5)}
+    .division-board{display:grid;grid-template-columns:minmax(280px,1fr) 176px;gap:0;max-width:690px;margin:18px auto 22px;align-items:start;font-variant-numeric:tabular-nums}
+    .left-work{padding:10px 12px 4px 0;border-right:4px solid light-dark(#1d2433,#eef2f8);min-height:300px}
+    .right-work{padding:10px 0 0 16px}
+    .top-number{display:flex;justify-content:flex-end;gap:8px;padding:0 2px 14px 0;font-size:34px;font-weight:900;letter-spacing:1px}
+    .top-slot{position:relative;width:52px;height:52px;display:flex;align-items:center;justify-content:center;border-radius:9px;cursor:pointer;transition:background .15s ease,box-shadow .15s ease,transform .15s ease}
+    .top-slot.selected{background:light-dark(#eaf0ff,#20304a);box-shadow:inset 0 0 0 2px #6b7cff}
+    .top-slot.selection-ok{background:light-dark(#e8fff2,#153526);box-shadow:inset 0 0 0 2px #25a864}
+    .top-slot.selection-error{background:light-dark(#fff0f1,#3c2025);box-shadow:0 0 0 5px rgba(255,61,69,.24),inset 0 0 0 2px #ff3d45}
+    .divisor-number{font-size:34px;font-weight:900;text-align:center;padding:0 4px 8px;letter-spacing:8px}
+    .quotient-line{border-top:4px solid light-dark(#1d2433,#eef2f8);padding-top:8px;display:flex;justify-content:center;gap:6px;flex-wrap:wrap}
+    .digit-box{width:46px;height:46px;padding:0;text-align:center;border:2px solid #1f7aff;border-radius:7px;background:light-dark(#f7fbff,#10233a);color:light-dark(#125fd1,#8fc0ff);font-size:25px;font-weight:900}
+    .work-stack{display:flex;flex-direction:column;align-items:flex-end;padding:0 2px 0 0;gap:8px}
+    .work-line{display:flex;align-items:center;gap:8px;width:100%;justify-content:flex-end}
+    .work-row{display:flex;gap:8px;justify-content:flex-end;min-height:52px}
+    .cell-wrap{position:relative;width:52px;height:52px}
+    .cell-wrap.empty{visibility:hidden}
+    .work-box{width:52px;height:52px;padding:0;text-align:center;border:2px solid #1f7aff;border-radius:7px;background:light-dark(#f7fbff,#10233a);color:light-dark(#125fd1,#8fc0ff);font-size:24px;font-weight:900}
+    .mini-carry{position:absolute;left:1px;bottom:2px;right:auto;top:auto;width:18px;height:16px;min-height:16px;padding:0;border:1.5px solid #ff3d45;border-radius:3px;background:light-dark(#fff7f7,#33181b);color:light-dark(#d51f2d,#ff9ca5);font-size:10px;line-height:14px;font-weight:900;text-align:center;z-index:2}
+    .top-slot .mini-carry{left:1px;bottom:2px;right:auto;top:auto}
+    .qbox:disabled,.workinput:disabled,.rembox:disabled,.mini-carry:disabled{opacity:.42;cursor:not-allowed}
+    .step-current{opacity:1!important;box-shadow:0 0 0 5px rgba(107,124,255,.18)}
+    .step-correct{border-color:#25a864!important;box-shadow:0 0 0 4px rgba(37,168,100,.14)}
+    .step-error{border-color:#ff3d45!important;box-shadow:0 0 0 6px rgba(255,61,69,.28)!important;animation:stepErrorPulse .55s ease}
+    @keyframes stepErrorPulse{0%,100%{transform:scale(1)}50%{transform:scale(1.05)}}
+    .step-label{display:none}
+    .carry-key{display:flex;justify-content:center;align-items:center;gap:7px;margin:-4px 0 14px;color:light-dark(#667085,#bdc7d8);font-size:13px;font-weight:750}
+    .carry-sample{display:inline-flex;width:22px;height:20px;border:1.5px solid #ff3d45;border-radius:4px;align-items:center;justify-content:center;color:#d51f2d;background:light-dark(#fff7f7,#33181b);font-size:11px;font-weight:900}
+    .instructions{text-align:center;color:light-dark(#667085,#bdc7d8);margin:0 0 18px;font-size:15px}
+    .answer-row{display:grid;grid-template-columns:1fr 1fr;gap:12px;margin-bottom:14px}
+    label{display:block;font-size:14px;font-weight:800;margin-bottom:6px}
+    input{width:100%;min-height:50px;border-radius:14px;border:2px solid light-dark(#cfd9e8,#3a495d);background:light-dark(#fbfdff,#101722);color:inherit;font:inherit;font-size:20px;font-weight:800;padding:10px 12px;outline:none}
+    input:focus{border-color:#6b7cff;box-shadow:0 0 0 4px rgba(107,124,255,.16)}
+    .actions{display:flex;gap:10px;flex-wrap:wrap;margin-top:10px}
+    button{min-height:46px;border:0;border-radius:14px;padding:11px 16px;font:inherit;font-weight:900;cursor:pointer;transition:transform .12s ease,opacity .12s ease}
+    button:active{transform:scale(.98)}
+    .primary{background:#6b7cff;color:white;flex:1}
+    .secondary{background:light-dark(#eaf0ff,#26344a);color:inherit}
+    .danger{background:light-dark(#ffeaea,#48272d);color:light-dark(#9d202b,#ffb4bd)}
+    .feedback{margin-top:16px;border-radius:16px;padding:14px 15px;font-weight:750;min-height:54px;display:flex;align-items:center}
+    .feedback.neutral{background:light-dark(#f5f7fb,#131c29);color:light-dark(#596579,#b8c4d7)}
+    .feedback.ok{background:light-dark(#e8fff2,#153526);color:light-dark(#137a47,#91e8b6)}
+    .feedback.bad{background:light-dark(#fff0f1,#3c2025);color:light-dark(#a32934,#ffabb5)}
+    .side{margin-top:16px}.side h3{margin:0 0 12px;font-size:20px}
+    .help-toggle{width:100%;margin-top:16px}
+    .step{padding:12px;border-radius:14px;background:light-dark(#f7f9fd,#131c29);margin-bottom:9px;border:1px solid light-dark(#e5ebf4,#26354a)}
+    .step strong{display:block;margin-bottom:3px}
+    .step span{font-size:14px;color:light-dark(#68758a,#b7c3d5)}
+    .progress{height:12px;border-radius:999px;background:light-dark(#e8edf5,#243248);overflow:hidden;margin-top:10px}
+    .bar{height:100%;width:0;background:linear-gradient(90deg,#6b7cff,#8a5cff);transition:width .25s ease}
+    .badge{display:inline-flex;align-items:center;gap:6px;background:light-dark(#fff6d8,#3b3217);color:light-dark(#8a6700,#ffdf72);border-radius:999px;padding:7px 10px;font-size:13px;font-weight:900;margin-bottom:12px}
+    .footer{margin-top:16px;text-align:center;color:light-dark(#738096,#9facbf);font-size:13px}
+    .hidden{display:none}
+    @media(max-width:760px){#division-game{padding:14px}.card{padding:16px}.answer-row{grid-template-columns:1fr}.stats{width:100%}.pill{flex:1}.level-picker{grid-template-columns:1fr}.division-board{grid-template-columns:minmax(210px,1fr) 124px;max-width:470px}.left-work{min-height:285px;padding-right:7px;overflow-x:auto}.right-work{padding-left:8px}.top-number,.work-row{gap:5px}.top-slot,.cell-wrap{width:44px;height:46px;flex:0 0 44px}.top-number{font-size:28px}.divisor-number{font-size:26px;letter-spacing:4px}.digit-box{width:40px;height:42px;font-size:21px}.work-box{width:44px;height:46px;font-size:21px}.mini-carry{left:1px;bottom:2px;width:16px;height:14px;min-height:14px;font-size:9px;line-height:12px}}
+    @media(prefers-reduced-motion:reduce){button,.bar,.top-slot{transition:none}.step-error{animation:none}}
+  </style>
+
+  <div class="wrap">
+    <div class="hero">
+      <div>
+        <div class="brand-row"><div class="brand-logo" aria-label="Logo JCH">JCH</div><div class="badge" id="levelBadge">🎯 Nivel 1 · 3 cifras ÷ 1 cifra</div></div>
+        <h2>Misión División</h2>
+        <p>Avanza por tres niveles y resuelve cada división directamente en el esquema, sin escribir restas.</p>
+      </div>
+      <div class="stats">
+        <div class="pill">⭐ <span id="score">0</span> pts</div>
+        <div class="pill">❤️ <span id="lives">3</span></div>
+        <div class="pill">📘 <span id="count">1</span>/25</div>
+      </div>
+    </div>
+
+    <div class="main">
+      <section class="card">
+        <div class="level-picker" aria-label="Seleccionar nivel">
+          <button type="button" class="level-btn active" data-level="1"><strong>Nivel 1</strong><span>3 cifras ÷ 1 cifra · ej. 324 ÷ 5</span></button>
+          <button type="button" class="level-btn" data-level="2"><strong>Nivel 2</strong><span>3 o 4 cifras ÷ 2 cifras · ej. 4521 ÷ 32</span></button>
+          <button type="button" class="level-btn" data-level="3"><strong>Nivel 3</strong><span>4 o 5 cifras ÷ 3 cifras · ej. 45821 ÷ 123</span></button>
+        </div>
+        <div class="division-board" aria-live="polite">
+          <div class="left-work">
+            <div class="top-number" id="topNumber"></div>
+            <div class="work-stack" id="workStack"></div>
+          </div>
+          <div class="right-work">
+            <div class="divisor-number" id="divisor">3</div>
+            <div class="quotient-line" id="quotientLine"></div>
+          </div>
+        </div>
+        <div class="carry-key"><span class="carry-sample">3</span> El cuadrito rojo indica cuánto aumentas la cifra: por ejemplo, 3 → 33.</div>
+        <p class="instructions" id="startInstruction">Primero toca las cifras iniciales que necesitas tomar del dividendo. Deben formar el primer número mayor o igual que el divisor, usando solo las cifras necesarias.</p>
+
+        <form id="answerForm">
+          <div class="actions">
+            <button class="primary" type="submit">Comprobar procedimiento</button>
+            <button class="secondary" id="hintBtn" type="button">💡 Pista</button>
+            <button class="secondary" id="newBtn" type="button">↻ Otro ejercicio</button>
+          </div>
+        </form>
+
+        <div id="feedback" class="feedback neutral" aria-live="polite">Primero selecciona con un toque las cifras con las que comenzarás la división.</div>
+        <div class="progress" aria-label="Progreso"><div id="bar" class="bar"></div></div>
+      </section>
+
+      <button id="helpToggle" class="secondary help-toggle" type="button" aria-expanded="false" aria-controls="helpPanel">🧠 Mostrar cómo resolverlo</button>
+      <aside class="card side hidden" id="helpPanel">
+        <h3>🧠 Cómo resolverlo</h3>
+        <div class="step"><strong>1. Mira las primeras cifras</strong><span>Toma las cifras necesarias del dividendo hasta tener un número igual o mayor que el divisor.</span></div>
+        <div class="step"><strong>2. Multiplica por la unidad</strong><span>Multiplica la cifra del cociente por la unidad del divisor. Si la cifra del dividendo es pequeña, auméntala: por ejemplo, 3 puede convertirse en 33. Escribe ese aumento en el cuadrito rojo.</span></div>
+        <div class="step"><strong>3. Escribe cuánto falta</strong><span>Si obtienes 25 y aumentaste 3 hasta 33, faltan 8. Ese 8 se escribe en la casilla grande de abajo.</span></div>
+        <div class="step"><strong>4. Trabaja la decena</strong><span>Multiplica por la decena del divisor y toma en cuenta el número del cuadrito rojo. Completa las casillas de izquierda a derecha, incluida la centena cuando corresponda.</span></div>
+        <div class="step"><strong>5. Baja y repite</strong><span>Baja la siguiente cifra, forma el nuevo número y repite el mismo procedimiento hasta obtener el residuo final.</span></div>
+        <button id="resetBtn" class="danger" type="button" style="width:100%;margin-top:6px">Reiniciar partida</button>
+      </aside>
+    </div>
+    <div class="footer">Consejo: comprueba con divisor × cociente + residuo = dividendo.</div>
+  </div>
+
+  <script>
+    (()=>{
+      const root=document.getElementById('division-game');
+      if(root.dataset.ready==='1')return; root.dataset.ready='1';
+      const $=s=>root.querySelector(s);
+      const divisorEl=$('#divisor'),topNumber=$('#topNumber'),workStack=$('#workStack'),quotientLine=$('#quotientLine'),levelBadge=$('#levelBadge');
+      const feedback=$('#feedback'), scoreEl=$('#score'), livesEl=$('#lives'), countEl=$('#count'), bar=$('#bar');
+      let score=0,lives=3,count=1,current=null,answered=false,level=1;
+      let usedProblems={1:new Set(),2:new Set(),3:new Set()};
+      let workflow=[],flowIndex=0,startConfirmed=false;
+
+      function rand(min,max){return Math.floor(Math.random()*(max-min+1))+min}
+      function inputAttrs(label){return `inputmode="numeric" pattern="[0-9]*" maxlength="1" autocomplete="off" autocapitalize="off" spellcheck="false" aria-label="${label}"`}
+      function levelConfig(){
+        if(level===1)return {dividendDigits:[3],divisorDigits:1,label:'Nivel 1 · 3 cifras ÷ 1 cifra'};
+        if(level===2)return {dividendDigits:[3,4],divisorDigits:2,label:'Nivel 2 · 3 o 4 cifras ÷ 2 cifras'};
+        return {dividendDigits:[4,5],divisorDigits:3,label:'Nivel 3 · 4 o 5 cifras ÷ 3 cifras'};
+      }
+      function makeProblem(){
+        const cfg=levelConfig();
+        let divisor,quotient,remainder,dividend,digitsWanted;
+        let key='',guard=0;
+        do{
+          guard++;
+          digitsWanted=cfg.dividendDigits[rand(0,cfg.dividendDigits.length-1)];
+          const dMin=cfg.divisorDigits===1?2:cfg.divisorDigits===2?12:101;
+          const dMax=cfg.divisorDigits===1?9:cfg.divisorDigits===2?89:899;
+          divisor=rand(dMin,dMax);
+          const minDividend=10**(digitsWanted-1),maxDividend=10**digitsWanted-1;
+          const qMin=Math.max(1,Math.ceil(minDividend/divisor));
+          const qMax=Math.max(qMin,Math.floor(maxDividend/divisor));
+          quotient=rand(qMin,qMax);
+          remainder=Math.random()<0.35?0:rand(1,divisor-1);
+          dividend=divisor*quotient+remainder;
+          key=`${dividend}/${divisor}`;
+        }while((String(dividend).length!==digitsWanted||quotient<1||usedProblems[level].has(key))&&guard<300);
+        usedProblems[level].add(key);
+        current=buildLongDivision(dividend,divisor);
+        divisorEl.textContent=current.divisor;
+        levelBadge.textContent='🎯 '+cfg.label;
+        renderBoard();
+        answered=false;
+        feedback.className='feedback neutral';
+        feedback.textContent='Primero selecciona con un toque las cifras con las que comenzarás la división.';
+      }
+      function buildLongDivision(dividend,divisor){
+        const ds=String(dividend).split('').map(Number); let partial=0,started=false; const steps=[],qDigits=[];
+        ds.forEach((digit,index)=>{
+          partial=partial*10+digit;
+          if(!started&&partial<divisor)return;
+          started=true;
+          const q=Math.floor(partial/divisor),rem=partial%divisor;
+          qDigits.push(q);
+          const next=index<ds.length-1?rem*10+ds[index+1]:null;
+          const nextDigit=index<ds.length-1?ds[index+1]:null;
+          steps.push({partial,q,rem,next,nextDigit,index});
+          partial=rem;
+        });
+        if(!started){qDigits.push(0);steps.push({partial:dividend,q:0,rem:dividend,next:null,nextDigit:null,index:ds.length-1});}
+        return {dividend,divisor,quotient:Number(qDigits.join('')),remainder:dividend%divisor,digits:ds,qDigits,steps};
+      }
+      function rowDigitsForStep(step){
+        const divisorWidth=String(current.divisor).length;
+        const remainderDigits=String(step.rem).padStart(divisorWidth,'0');
+        return step.nextDigit===null?remainderDigits:remainderDigits+String(step.nextDigit);
+      }
+      function renderBoard(){
+        topNumber.innerHTML=current.digits.map((d,i)=>`<div class="top-slot" data-top="${i}" role="button" tabindex="0" aria-label="Tomar el dividendo hasta la cifra ${i+1}"><span>${d}</span></div>`).join('');
+        quotientLine.innerHTML=current.qDigits.map((_,i)=>`<input class="digit-box qbox" data-q="${i}" ${inputAttrs('Cifra '+(i+1)+' del cociente')}>`).join('');
+        workStack.innerHTML='';
+        current.steps.forEach((step,i)=>{
+          if(step.next===null)return;
+          const chars=rowDigitsForStep(step).split('');
+          const row=document.createElement('div'); row.className='work-line';
+          const label=document.createElement('span'); label.className='step-label'; label.textContent='Número formado';
+          const work=document.createElement('div'); work.className='work-row';
+          const endPosition=Math.min(current.digits.length-1,step.index+1);
+          const startPosition=Math.max(0,endPosition-chars.length+1);
+          for(let b=0;b<startPosition;b++){const w=document.createElement('div');w.className='cell-wrap empty';work.appendChild(w);}
+          chars.forEach((ch,j)=>{
+            const w=document.createElement('div');w.className='cell-wrap';
+            w.innerHTML=`<input class="work-box workinput" data-step="${i}" data-pos="${j}" ${inputAttrs('Cifra del número formado')}>`;
+            work.appendChild(w);
+          });
+          const usedSlots=startPosition+chars.length;
+          for(let b=usedSlots;b<current.digits.length;b++){const w=document.createElement('div');w.className='cell-wrap empty';work.appendChild(w);}
+          row.append(label,work);workStack.appendChild(row);
+        });
+        const finalStep=current.steps[current.steps.length-1];
+        const remChars=rowDigitsForStep(finalStep).split('');
+        const row=document.createElement('div');row.className='work-line';
+        const label=document.createElement('span');label.className='step-label';label.textContent='Cuánto falta';
+        const work=document.createElement('div');work.className='work-row';
+        const finalEnd=Math.min(current.digits.length-1,finalStep.index);
+        const finalStart=Math.max(0,finalEnd-remChars.length+1);
+        for(let b=0;b<finalStart;b++){const w=document.createElement('div');w.className='cell-wrap empty';work.appendChild(w);}
+        remChars.forEach((ch,j)=>{const w=document.createElement('div');w.className='cell-wrap';w.innerHTML=`<input class="work-box rembox" data-pos="${j}" ${inputAttrs('Cuánto falta en esta posición')}>`;work.appendChild(w);});
+        for(let b=finalStart+remChars.length;b<current.digits.length;b++){const w=document.createElement('div');w.className='cell-wrap empty';work.appendChild(w);}
+        row.append(label,work);workStack.appendChild(row);
+        addMiniCarries();
+        prepareGuidedFlow();
+        root.querySelectorAll('.qbox,.workinput,.rembox,.mini-carry').forEach(box=>box.addEventListener('input',()=>handleGuidedInput(box)));
+        topNumber.querySelectorAll('.top-slot').forEach(slot=>{
+          slot.addEventListener('click',()=>selectStartingDigits(Number(slot.dataset.top)));
+          slot.addEventListener('keydown',e=>{if(e.key==='Enter'||e.key===' '){e.preventDefault();selectStartingDigits(Number(slot.dataset.top));}});
+        });
+      }
+      function addMiniCarries(){
+        const divisorWidth=String(current.divisor).length;
+        if(divisorWidth===1){
+          current.steps.forEach(step=>{step.carry=0;});
+          return;
+        }
+        current.steps.forEach((step,i)=>{
+          const unitProduct=(step.q*(current.divisor%10));
+          const unitDigit=step.partial%10;
+          const carry=Math.max(0,Math.ceil((unitProduct-unitDigit)/10));
+          step.carry=carry;
+          if(carry>0){
+            const mini=document.createElement('input');mini.className='mini-carry';mini.dataset.carry=i;mini.setAttribute('inputmode','numeric');mini.setAttribute('pattern','[0-9]*');mini.setAttribute('maxlength','1');mini.setAttribute('autocomplete','off');mini.setAttribute('autocapitalize','off');mini.setAttribute('spellcheck','false');mini.setAttribute('aria-label','Aumento necesario');
+            let host=null;
+            if(i===0){
+              const topSlots=[...topNumber.querySelectorAll('.top-slot')];
+              host=topSlots[step.index]||null;
+            }else{
+              const currentRow=[...workStack.querySelectorAll(`.workinput[data-step="${i-1}"]`)];
+              const loweredDigit=currentRow[currentRow.length-1];
+              host=loweredDigit?loweredDigit.parentElement:null;
+            }
+            if(host)host.appendChild(mini);
+          }
+        });
+      }
+      function expectedStartLength(){
+        return current&&current.steps.length?current.steps[0].index+1:1;
+      }
+      function selectStartingDigits(endIndex){
+        if(startConfirmed||!current)return;
+        const slots=[...topNumber.querySelectorAll('.top-slot')];
+        const length=endIndex+1;
+        const value=Number(current.digits.slice(0,length).join(''));
+        const needed=expectedStartLength();
+        slots.forEach((slot,i)=>{
+          slot.classList.toggle('selected',i<length);
+          slot.classList.remove('selection-ok','selection-error');
+        });
+        if(length===needed&&value>=current.divisor){
+          startConfirmed=true;
+          slots.slice(0,length).forEach(slot=>{slot.classList.remove('selected');slot.classList.add('selection-ok');});
+          feedback.className='feedback ok';
+          feedback.textContent=`✅ Correcto: ${value} es el primer número que permite comenzar con ${current.divisor}. Ahora sigue la casilla iluminada.`;
+          beginGuidedFlow();
+          return;
+        }
+        slots.slice(0,length).forEach(slot=>slot.classList.add('selection-error'));
+        feedback.className='feedback bad';
+        if(value<current.divisor){
+          feedback.textContent=`🔴 ${value} todavía es menor que ${current.divisor}. Toma una cifra más.`;
+        }else if(length>needed){
+          feedback.textContent=`🔴 ${value} sí alcanza, pero tomaste más cifras de las necesarias. Prueba con menos cifras desde la izquierda.`;
+        }else{
+          feedback.textContent='🔴 Revisa las cifras iniciales que elegiste.';
+        }
+      }
+      function prepareGuidedFlow(){
+        workflow=[];flowIndex=0;startConfirmed=false;
+        root.querySelectorAll('.qbox,.workinput,.rembox,.mini-carry').forEach(box=>{
+          box.disabled=true;box.readOnly=false;box.classList.remove('step-current','step-correct','step-error');
+        });
+        current.steps.forEach((step,i)=>{
+          const q=root.querySelector(`.qbox[data-q="${i}"]`);if(q)workflow.push(q);
+          const carry=root.querySelector(`.mini-carry[data-carry="${i}"]`);if(carry)workflow.push(carry);
+          const stepBoxes=[...root.querySelectorAll(`.workinput[data-step="${i}"]`)];
+          if(step.nextDigit!==null&&stepBoxes.length){
+            const loweredDigitBox=stepBoxes[stepBoxes.length-1];
+            const resultBoxes=stepBoxes.slice(0,-1);
+            resultBoxes.reverse().forEach(box=>workflow.push(box));
+            workflow.push(loweredDigitBox);
+          }else{
+            stepBoxes.reverse().forEach(box=>workflow.push(box));
+          }
+        });
+        const remBoxes=[...root.querySelectorAll('.rembox')];
+        remBoxes.reverse().forEach(box=>workflow.push(box));
+      }
+      function beginGuidedFlow(){
+        flowIndex=0;
+        activateWorkflowField();
+      }
+      function activateWorkflowField(){
+        if(flowIndex>=workflow.length){
+          feedback.className='feedback ok';
+          feedback.textContent='✅ Completaste todos los pasos. Pulsa “Comprobar procedimiento”.';
+          return;
+        }
+        const box=workflow[flowIndex];
+        box.disabled=false;box.readOnly=false;box.classList.add('step-current');box.focus();
+      }
+      function expectedValueFor(box){
+        if(box.classList.contains('qbox'))return current.qDigits[Number(box.dataset.q)];
+        if(box.classList.contains('workinput')){
+          const step=current.steps[Number(box.dataset.step)];
+          return Number(rowDigitsForStep(step).split('')[Number(box.dataset.pos)]);
+        }
+        if(box.classList.contains('rembox')){
+          const remBoxes=[...root.querySelectorAll('.rembox')];
+          const expected=String(current.remainder).padStart(remBoxes.length,'0').split('').map(Number);
+          return expected[Number(box.dataset.pos)];
+        }
+        if(box.classList.contains('mini-carry'))return current.steps[Number(box.dataset.carry)].carry;
+        return null;
+      }
+      function handleGuidedInput(box){
+        box.value=box.value.replace(/\D/g,'').slice(-1);
+        box.classList.remove('step-error');
+        if(!box.value)return;
+        if(box!==workflow[flowIndex]){
+          box.value='';return;
+        }
+        const expected=expectedValueFor(box);
+        if(Number(box.value)!==expected){
+          box.classList.add('step-error');
+          feedback.className='feedback bad';
+          feedback.textContent='🔴 Hay un error en este paso. Corrige la casilla iluminada antes de continuar.';
+          return;
+        }
+        box.classList.remove('step-current','step-error');box.classList.add('step-correct');box.readOnly=true;
+        feedback.className='feedback neutral';feedback.textContent='✓ Correcto. Continúa con la siguiente posición.';
+        flowIndex++;
+        setTimeout(activateWorkflowField,90);
+      }
+      function update(){scoreEl.textContent=score;livesEl.textContent=lives;countEl.textContent=count;bar.style.width=((count-1)/25*100)+'%'}
+      function next(){
+        if(count>=25||lives<=0){finish();return}
+        count++;update();makeProblem();
+      }
+      function finish(){
+        bar.style.width='100%';
+        const won=lives>0;
+        feedback.className='feedback '+(won?'ok':'bad');
+        feedback.textContent=won?`🏆 ¡Nivel completado! Lograste ${score} puntos de 250.`:`💥 Se acabaron las vidas. Tu puntuación final fue ${score}.`;
+        root.querySelectorAll('.qbox,.workinput,.rembox,.mini-carry').forEach(b=>b.disabled=true);
+      }
+      function reset(){score=0;lives=3;count=1;answered=false;usedProblems[level]=new Set();update();makeProblem()}
+      function positiveMessage(){
+        const progress=count/25;
+        let options;
+        if(progress<0.25)options=['🌟 ¡Excelente comienzo!','👏 ¡Muy bien! Vas por buen camino.','💪 ¡Bien hecho! Sigue practicando.','🎯 ¡Correcto! Continúa así.'];
+        else if(progress<0.6)options=['🚀 ¡Excelente! Ya estás dominando el procedimiento.','👏 ¡Muy buen trabajo! Sigue así.','🧠 ¡Genial! Tus pasos están cada vez más seguros.','⭐ ¡Perfecto! Mantén ese ritmo.'];
+        else if(progress<0.9)options=['🏅 ¡Excelente trabajo! Estás muy cerca de completar el nivel.','🔥 ¡Muy bien! Tu precisión está mejorando mucho.','💪 ¡Sigue así! Ya dominas gran parte del nivel.','🌟 ¡Fantástico! Cada vez lo haces mejor.'];
+        else options=['🏆 ¡Excelente! Estás terminando el nivel con gran trabajo.','🎉 ¡Muy bien! Casi completas los 25 ejercicios.','⭐ ¡Magnífico! Tu esfuerzo está dando resultado.'];
+        return options[rand(0,options.length-1)];
+      }
+      function hint(){
+        if(!current)return;
+        let partial='';
+        for(const d of current.digits){partial+=d;if(Number(partial)>=current.divisor)break;}
+        feedback.className='feedback neutral';
+        feedback.textContent=`💡 Empieza por ${Number(partial)}: ¿cuántas veces cabe ${current.divisor} sin pasarse? Esa será la primera cifra del cociente.`;
+      }
+      $('#answerForm').addEventListener('submit',e=>{
+        e.preventDefault();
+        if(answered||lives<=0)return;
+        if(!startConfirmed){
+          feedback.className='feedback bad';feedback.textContent='🔴 Primero selecciona las cifras iniciales del dividendo con las que vas a comenzar.';return;
+        }
+        const qBoxes=[...root.querySelectorAll('.qbox')],workBoxes=[...root.querySelectorAll('.workinput')],remBoxes=[...root.querySelectorAll('.rembox')],carryBoxes=[...root.querySelectorAll('.mini-carry')];
+        if([...qBoxes,...workBoxes,...remBoxes,...carryBoxes].some(b=>b.value==='')){
+          feedback.className='feedback bad';feedback.textContent='Sigue completando la casilla iluminada; el cursor avanzará automáticamente.';if(workflow[flowIndex])workflow[flowIndex].focus();return;
+        }
+        const qCorrect=qBoxes.every((b,i)=>Number(b.value)===current.qDigits[i]);
+        let workCorrect=true;
+        workBoxes.forEach(b=>{const s=current.steps[Number(b.dataset.step)],chars=rowDigitsForStep(s).split('');if(String(b.dataset.pos).startsWith('lead-')){if(Number(b.value)!==0)workCorrect=false;}else if(Number(b.value)!==Number(chars[Number(b.dataset.pos)]))workCorrect=false;});
+        const remExpected=String(current.remainder).padStart(remBoxes.length,'0').split('').map(Number);
+        const remCorrect=remBoxes.every((b,i)=>Number(b.value)===remExpected[i]);
+        const carryCorrect=carryBoxes.every(b=>Number(b.value)===current.steps[Number(b.dataset.carry)].carry);
+        const correct=qCorrect&&workCorrect&&remCorrect&&carryCorrect;
+        if(correct){
+          answered=true;score+=10;update();feedback.className='feedback ok';
+          feedback.textContent=`${positiveMessage()} ✅ ${current.divisor} × ${current.quotient} + ${current.remainder} = ${current.dividend}.`;
+          setTimeout(next,1100);
+        }else{
+          lives--;update();feedback.className='feedback bad';
+          const firstWrong=[...qBoxes,...workBoxes,...remBoxes,...carryBoxes].find(b=>{
+            if(b.classList.contains('qbox'))return Number(b.value)!==current.qDigits[Number(b.dataset.q)];
+            if(b.classList.contains('workinput')){if(String(b.dataset.pos).startsWith('lead-'))return Number(b.value)!==0;return Number(b.value)!==Number(rowDigitsForStep(current.steps[Number(b.dataset.step)]).split('')[Number(b.dataset.pos)]);}
+            if(b.classList.contains('rembox'))return Number(b.value)!==remExpected[Number(b.dataset.pos)];
+            return Number(b.value)!==current.steps[Number(b.dataset.carry)].carry;
+          });
+          if(firstWrong)firstWrong.focus();
+          feedback.textContent=lives>0?'❌ Hay una casilla incorrecta. Revisa primero los cuadritos rojos de aumento y luego cuánto falta en cada casilla grande.':`❌ La respuesta final era ${current.quotient} con residuo ${current.remainder}.`;
+          if(lives<=0)setTimeout(finish,500);
+        }
+      });
+      root.querySelectorAll('.level-btn').forEach(btn=>btn.addEventListener('click',()=>{
+        level=Number(btn.dataset.level);root.querySelectorAll('.level-btn').forEach(b=>b.classList.toggle('active',b===btn));reset();
+      }));
+      $('#hintBtn').addEventListener('click',hint);
+      $('#newBtn').addEventListener('click',()=>{if(lives>0)makeProblem()});
+      $('#resetBtn').addEventListener('click',reset);
+      $('#helpToggle').addEventListener('click',()=>{
+        const panel=$('#helpPanel'),btn=$('#helpToggle'),open=panel.classList.toggle('hidden')===false;
+        btn.setAttribute('aria-expanded',String(open));
+        btn.textContent=open?'🧠 Ocultar cómo resolverlo':'🧠 Mostrar cómo resolverlo';
+      });
+      update();makeProblem();
+    })();
+  </script>
+</div>
+</div>
+
+<script>
+(() => {
+  const PASSWORD = 'JCH2026';
+  const gate = document.getElementById('access-gate');
+  const shell = document.getElementById('game-shell');
+  const form = document.getElementById('access-form');
+  const input = document.getElementById('access-password');
+  const message = document.getElementById('access-message');
+
+  function unlock() {
+    gate.style.display = 'none';
+    shell.style.display = 'block';
+    try { sessionStorage.setItem('jch_access','1'); } catch(e) {}
+  }
+
+  try {
+    if (sessionStorage.getItem('jch_access') === '1') unlock();
+  } catch(e) {}
+
+  form.addEventListener('submit', (e) => {
+    e.preventDefault();
+    if (input.value.trim() === PASSWORD) {
+      message.textContent = '';
+      unlock();
+    } else {
+      message.textContent = 'Contraseña incorrecta. Intenta nuevamente.';
+      input.value = '';
+      input.focus();
+    }
+  });
+})();
+</script>
+</body>
+</html>
